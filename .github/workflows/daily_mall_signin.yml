@@ -1,0 +1,36 @@
+name: Daily Mall Sign In
+
+on:
+  schedule:
+    - cron: "0 1 * * *"  # 每天 1:00 (UTC) 运行，等同于北京时间 9:00
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  run_script:
+    runs-on: ubuntu-latest  # 运行环境，使用最新 Ubuntu 服务器
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4  # 拉取代码
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'  # 选择 Python 版本
+
+      - name: Install Dependencies
+        run: pip install requests  # 安装 requests 依赖
+
+      - name: DaJu SignIn
+        env:
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+          TOKEN: ${{ secrets.TOKEN }}
+        run: python daju/mallcoo_signin.py  # 运行 Python 签到脚本
+      - name: XinYe SignIn
+        env:
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+          XY_TOKEN: ${{ secrets.XY_TOKEN }}
+        run: python xinye/ruiheng_signin.py  # 运行 Python 签到脚本
