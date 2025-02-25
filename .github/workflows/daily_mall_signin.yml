@@ -2,7 +2,7 @@ name: Daily Mall Sign In
 
 on:
   schedule:
-    - cron: "0 1 * * *"  # 每天 1:00 (UTC) 运行，等同于北京时间 9:00
+    - cron: "48 1 * * *"  # 每天运行(UTC) ，等同于北京时间-8h
   workflow_dispatch:  # 允许手动触发
 
 jobs:

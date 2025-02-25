@@ -1,16 +1,11 @@
 import os
 import requests
-import smtplib
 import time
 import random
-from email.mime.text import MIMEText
-from email.header import Header
+from tool.mail_util import send_email
 
 # 读取环境变量
 token = os.getenv("TOKEN")
-sender_email = os.getenv("EMAIL_SENDER")
-email_password = os.getenv("EMAIL_PASSWORD")
-receiver_email = os.getenv("EMAIL_RECEIVER")
 
 # 目标 URL
 url = "https://m.mallcoo.cn/api/user/User/CheckinV2"
@@ -42,9 +37,7 @@ def check_in():
     try:
         # Generate a random delay time in seconds (up to 5 minutes)
         delay_time = random.randint(0, 60)  # 300 seconds = 5 minutes
-
         print(f"延迟{delay_time}秒后执行")
-
         # Delay the program execution
         time.sleep(delay_time)
         response = requests.post(url, headers=headers, json=data)
@@ -53,30 +46,11 @@ def check_in():
         if response.status_code == 200 and response_data.get("m") == 1:
             print("签到成功:", response_data["d"].get("Msg", ""))
         else:
-            print("签到失败:", response_data)
-            send_failure_email(response_data)
+            print("签到失败:", response)
+            send_email("大橘签到失败通知", f"请求失败，返回信息如下：\n\n{response_data}", response_data)
     except requests.exceptions.RequestException as e:
         print("请求错误:", str(e))
-        send_failure_email(str(e))
-
-# 发送失败通知邮件
-def send_failure_email(error_msg):
-    subject = "大橘签到请求失败通知"
-    body = f"请求失败，错误信息如下：\n\n{error_msg}"
-
-    message = MIMEText(body, "plain", "utf-8")
-    message["From"] = sender_email
-    message["To"] = receiver_email
-    message["Subject"] = Header(subject, "utf-8")
-
-    try:
-        server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-        server.login(sender_email, email_password)
-        server.sendmail(sender_email, [receiver_email], message.as_string())
-        server.quit()
-        print("失败通知邮件已发送:", receiver_email)
-    except Exception as e:
-        print("邮件发送失败:", receiver_email, str(e))
+        send_email("大橘签到异常", str(e))
 
 if __name__ == "__main__":
     check_in()
