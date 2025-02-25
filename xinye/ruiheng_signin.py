@@ -1,14 +1,14 @@
 import json
 import os
-import smtplib
-from email.mime.text import MIMEText
-from tool.mail_util import send_email
 
 import requests
+
+from tool.mail_util import send_email
 
 # 配置信息（需要用户替换）
 # 读取环境变量
 token = os.getenv("XY_TOKEN")
+
 
 def check_api():
     """执行API请求并检查响应"""
@@ -23,6 +23,7 @@ def check_api():
     try:
         response = requests.post(url, headers=headers, json={}, timeout=10)
 
+        print(f"签到返回, httpcode[{response.status_code}], body:{response.text}")
         # 检查HTTP状态码
         if response.status_code != 200:
             error_info = f"HTTP状态码异常: {response.status_code}\n响应内容: {response.text}"
@@ -31,13 +32,13 @@ def check_api():
 
         # 检查业务状态码
         response_data = response.json()
-        print("签到返回:", response_data)
         if response_data.get("code") != 200:
             error_info = f"业务状态码异常: {response_data}\n原始响应: {response.text}"
             send_email("信业签到失败通知", error_info)
             return False
 
         print("签到成功")
+        send_email("信业签到成功", f"请求成功，返回信息如下：\n\n{response_data}")
         return True
 
     except requests.exceptions.RequestException as e:
@@ -48,6 +49,7 @@ def check_api():
         error_info = f"响应解析失败，原始响应: {response.text}"
         send_email("信业签到失败通知", error_info)
         return False
+
 
 if __name__ == "__main__":
     check_api()

@@ -2,7 +2,7 @@ name: Daily Mall Sign In
 
 on:
   schedule:
-    - cron: "45 0,2,10 * * *"  # 每天运行(UTC) ，等同于北京时间-8h
+    - cron: "29 0,3,10 * * *"  # 每天运行(UTC) ，等同于北京时间-8h
   workflow_dispatch:  # 允许手动触发
 
 jobs:
@@ -26,11 +26,11 @@ jobs:
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
           TOKEN: ${{ secrets.TOKEN }}
-        run: python daju/mallcoo_signin.py  # 运行 Python 签到脚本
+        run: python -m daju.mallcoo_signin  # 运行 Python 签到脚本
       - name: XinYe SignIn
         env:
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
           XY_TOKEN: ${{ secrets.XY_TOKEN }}
-        run: python xinye/ruiheng_signin.py  # 运行 Python 签到脚本
+        run: python -m xinye.ruiheng_signin  # 运行 Python 签到脚本
