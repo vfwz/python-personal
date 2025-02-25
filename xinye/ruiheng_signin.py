@@ -14,7 +14,7 @@ def check_api():
     """执行API请求并检查响应"""
     url = "https://ottomall.ruiheng.net.cn/api/app/sign"
     headers = {
-        "Authorization": {token},
+        "Authorization": f"{token}",
         "Content-Type": "application/json",
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.56(0x18003831) NetType/4G Language/zh_CN",
         "Referer": "https://servicewechat.com/wxf7572e0c9b87c29b/26/page-frame.html"
