@@ -23,18 +23,18 @@ def check_api():
     try:
         response = requests.post(url, headers=headers, json={}, timeout=10)
 
-        print(f"签到返回, httpcode[{response.status_code}], body:{response.text}")
+        # print(f"签到返回, httpcode[{response.status_code}], body:{response.text}")
         # 检查HTTP状态码
         if response.status_code != 200:
             error_info = f"HTTP状态码异常: {response.status_code}\n响应内容: {response.text}"
-            send_email("信业签到失败通知", error_info)
+            send_email("信业签到失败", error_info)
             return False
 
         # 检查业务状态码
         response_data = response.json()
         if response_data.get("code") != 200:
             error_info = f"业务状态码异常: {response_data}\n原始响应: {response.text}"
-            send_email("信业签到失败通知", error_info)
+            send_email("信业签到失败", error_info)
             return False
 
         print("签到成功")
@@ -43,11 +43,11 @@ def check_api():
 
     except requests.exceptions.RequestException as e:
         error_info = f"请求异常: {str(e)}"
-        send_email("信业签到失败通知", error_info)
+        send_email("信业签到失败", error_info)
         return False
     except json.JSONDecodeError:
         error_info = f"响应解析失败，原始响应: {response.text}"
-        send_email("信业签到失败通知", error_info)
+        send_email("信业签到失败", error_info)
         return False
 
 

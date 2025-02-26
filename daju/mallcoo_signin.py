@@ -37,7 +37,7 @@ data = {
 def check_in():
     try:
         response = requests.post(url, headers=headers, json=data)
-        print(f"签到返回, httpcode[{response.status_code}], body:{response.text}")
+        # print(f"签到返回, httpcode[{response.status_code}], body:{response.text}")
 
         response_data = response.json()
         if response.status_code == 200 and response_data.get("m") == 1:
