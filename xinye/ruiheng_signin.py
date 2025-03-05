@@ -4,6 +4,7 @@ import os
 import requests
 
 from tool.mail_util import send_email
+from xinye.ruiheng_signinfo import is_today_signed_in
 
 # 配置信息（需要用户替换）
 # 读取环境变量
@@ -52,4 +53,7 @@ def check_api():
 
 
 if __name__ == "__main__":
-    check_api()
+    if is_today_signed_in():
+        print('今日已签到, 无需再签到')
+    else:
+        check_api()

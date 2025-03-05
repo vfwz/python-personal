@@ -1,8 +1,8 @@
 import os
-
 import requests
 
 from tool.mail_util import send_email
+from daju.mallcoo_checkinlist import isChecked
 
 # 读取环境变量
 token = os.getenv("TOKEN")
@@ -52,4 +52,7 @@ def check_in():
 
 
 if __name__ == "__main__":
-    check_in()
+    if(isChecked()):
+        print("已签到，无需重复签到")
+    else:
+        check_in()

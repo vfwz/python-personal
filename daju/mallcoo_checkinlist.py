@@ -1,10 +1,13 @@
+import os
+from datetime import datetime
+
 import requests
 
 # 目标 URL
 url = "https://m.mallcoo.cn/api/user/User/GetUserCheckinList"
 
 # Token 变量
-token = "{Token}"
+token = os.getenv("TOKEN")
 
 # HTTP 请求头
 headers = {
@@ -29,18 +32,40 @@ data = {
     }
 }
 
-# 发送 HTTP 请求
-try:
-    response = requests.post(url, headers=headers, json=data)
-    response_data = response.json()
 
-    # 解析返回值
-    if response.status_code == 200 and response_data.get("m") == 1:
-        # print("请求成功:", response_data["d"].get("Msg", ""))
-        print("请求成功:", response_data)
-    else:
-        print("请求失败:", response_data)
+def is_current_date_in_response(response):
+    try:
+        # Ensure the response status is successful
+        if response.get("m") != 1:
+            return False
 
-except requests.exceptions.RequestException as e:
-    print("请求错误:", str(e))
+        # Extract today's date in 'YYYY/MM/DD' format
+        today_str = datetime.now().strftime("%Y/%m/%d")
 
+        # Check if today's date exists in any 'CheckInTime' entry
+        return any(today_str in entry["CheckInTime"] for entry in response.get("d", []))
+
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return False  # Return False if any exception occurs
+
+
+def isChecked():
+    # 发送 HTTP 请求
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        response_data = response.json()
+
+        print(f"签到检查返回, httpcode[{response.status_code}], body:{response.text}")
+        # 解析返回值
+        if response.status_code == 200 and is_current_date_in_response(response_data):
+            # Call the function and print result
+            print("今日是否已签到: ",
+                  is_current_date_in_response(response_data))  # Output: True or False depending on the current date
+            return True
+        else:
+            print("请求失败:", response_data)
+
+    except requests.exceptions.RequestException as e:
+        print("请求错误:", str(e))
+    return False

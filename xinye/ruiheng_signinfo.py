@@ -1,17 +1,19 @@
 import json
+import os
+from datetime import datetime
 
 import requests
 
-token = "{token}"
+token = os.getenv("XY_TOKEN")
 
-def send_alert_email(error_info):
-    return
 
-def check_api():
+
+def is_today_signed_in():
     """执行API请求并检查响应"""
-    url = "https://ottomall.ruiheng.net.cn/api/app/sign?month=2025-02"
+    month = datetime.now().strftime("%Y-%m")
+    url = "https://ottomall.ruiheng.net.cn/api/app/sign?month=" + month
     headers = {
-        "Authorization": f"Bearer {token}",  # 修正Bearer格式
+        "Authorization": token,  # 修正Bearer格式
         "Content-Type": "application/json",
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.56(0x18003831) NetType/4G Language/zh_CN",
         "Referer": "https://servicewechat.com/wxf7572e0c9b87c29b/26/page-frame.html"
@@ -22,28 +24,27 @@ def check_api():
 
         # 检查HTTP状态码
         if response.status_code != 200:
-            error_info = f"HTTP状态码异常: {response.status_code}\n响应内容: {response.text}"
-            send_alert_email(error_info)
+            print(f"HTTP状态码异常: {response.status_code}, 响应内容: {response.text}")
+            return False
+        # print("签到检查数据返回:", response.text)
+        respJson = response.json()
+        # Ensure the response status is successful
+        if respJson.get("code") != 200:
             return False
 
-        # 检查业务状态码
-        response_data = response.json()
-        print("签到数据返回:", response_data)
-        if response_data.get("code") != 200:
-            error_info = f"业务状态码异常: {response_data}\n原始响应: {response.text}"
-            send_alert_email(error_info)
-            return False
+        # Extract today's date in 'YYYY-MM-DD' format
+        today_str = datetime.now().strftime("%Y-%m-%d")
 
-        return True
+        # Get the list of records
+        records = respJson.get("data", {}).get("records", [])
 
-    except requests.exceptions.RequestException as e:
-        error_info = f"请求异常: {str(e)}"
-        send_alert_email(error_info)
-        return False
-    except json.JSONDecodeError:
-        error_info = f"响应解析失败，原始响应: {response.text}"
-        send_alert_email(error_info)
-        return False
+        # Check if today's date exists in any 'signDate' entry
+        return any(today_str == record.get("signDate") for record in records)
+    except Exception as e:
+        print(f"签到检查报错: {e}")
+        return False  # Return False if any exception occurs
+
+
 
 if __name__ == "__main__":
-    check_api()
+    print("今日是否已签到: ", is_today_signed_in())
