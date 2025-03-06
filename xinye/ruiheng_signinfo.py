@@ -1,5 +1,6 @@
 import json
 import os
+import pytz
 from datetime import datetime
 
 import requests
@@ -10,7 +11,7 @@ token = os.getenv("XY_TOKEN")
 
 def is_today_signed_in():
     """执行API请求并检查响应"""
-    month = datetime.now().strftime("%Y-%m")
+    month = datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y-%m")
     url = "https://ottomall.ruiheng.net.cn/api/app/sign?month=" + month
     headers = {
         "Authorization": token,  # 修正Bearer格式
@@ -33,13 +34,14 @@ def is_today_signed_in():
             return False
 
         # Extract today's date in 'YYYY-MM-DD' format
-        today_str = datetime.now().strftime("%Y-%m-%d")
+        today_str = datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y-%m-%d")
 
         # Get the list of records
         records = respJson.get("data", {}).get("records", [])
-
+        ret = any(today_str == record.get("signDate") for record in records)
+        print(f"今日[{today_str}]是否已签到: {ret}")
         # Check if today's date exists in any 'signDate' entry
-        return any(today_str == record.get("signDate") for record in records)
+        return ret
     except Exception as e:
         print(f"签到检查报错: {e}")
         return False  # Return False if any exception occurs

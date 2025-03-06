@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import pytz
 
 import requests
 
@@ -33,17 +34,14 @@ data = {
 }
 
 
-def is_current_date_in_response(response):
+def is_date_in_response(date, response):
     try:
         # Ensure the response status is successful
         if response.get("m") != 1:
             return False
 
-        # Extract today's date in 'YYYY/MM/DD' format
-        today_str = datetime.now().strftime("%Y/%m/%d")
-
         # Check if today's date exists in any 'CheckInTime' entry
-        return any(today_str in entry["CheckInTime"] for entry in response.get("d", []))
+        return any(date in entry["CheckInTime"] for entry in response.get("d", []))
 
     except Exception as e:
         print(f"Error occurred: {e}")
@@ -58,14 +56,19 @@ def isChecked():
 
         print(f"签到检查返回, httpcode[{response.status_code}], body:{response.text}")
         # 解析返回值
-        if response.status_code == 200 and is_current_date_in_response(response_data):
+        if response.status_code == 200:
             # Call the function and print result
-            print("今日是否已签到: ",
-                  is_current_date_in_response(response_data))  # Output: True or False depending on the current date
-            return True
-        else:
-            print("请求失败:", response_data)
+            # Extract today's date in 'YYYY/MM/DD' format
+            today_str = datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y/%m/%d")
+            ret = is_date_in_response(today_str, response_data)
+            print(f"今日[{today_str}]是否已签到: {ret}")
+            return ret
 
     except requests.exceptions.RequestException as e:
         print("请求错误:", str(e))
     return False
+
+
+if __name__ == "__main__":
+    if (isChecked()):
+        print("已签到，无需重复签到")
