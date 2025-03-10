@@ -1,7 +1,8 @@
 import os
+import time
 from datetime import datetime
-import pytz
 
+import pytz
 import requests
 
 # 目标 URL
@@ -49,9 +50,11 @@ def is_date_in_response(date, response):
 
 
 def isChecked():
+    start_time = time.time()
+    ret = False
     # 发送 HTTP 请求
     try:
-        response = requests.post(url, headers=headers, json=data)
+        response = requests.post(url, headers=headers, json=data, timeout=10)
         response_data = response.json()
 
         print(f"签到检查返回, httpcode[{response.status_code}], body:{response.text}")
@@ -62,11 +65,12 @@ def isChecked():
             today_str = datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y/%m/%d")
             ret = is_date_in_response(today_str, response_data)
             print(f"今日[{today_str}]是否已签到: {ret}")
-            return ret
 
     except requests.exceptions.RequestException as e:
         print("请求错误:", str(e))
-    return False
+    end_time = time.time()  # End time
+    print(f"签到检查用时: {end_time - start_time:.4f} 秒")
+    return ret
 
 
 if __name__ == "__main__":

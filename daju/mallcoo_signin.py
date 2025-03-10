@@ -1,8 +1,10 @@
 import os
+import time
+
 import requests
 
-from tool.mail_util import send_email
 from daju.mallcoo_checkinlist import isChecked
+from tool.mail_util import send_email
 
 # 读取环境变量
 token = os.getenv("TOKEN")
@@ -35,24 +37,29 @@ data = {
 
 # 发送 HTTP 请求
 def check_in():
+    start_time = time.time()
     try:
-        response = requests.post(url, headers=headers, json=data)
+        response = requests.post(url, headers=headers, json=data, timeout=10)
         # print(f"签到返回, httpcode[{response.status_code}], body:{response.text}")
 
         response_data = response.json()
         if response.status_code == 200 and response_data.get("m") == 1:
             print("签到成功")
-            send_email("大橘签到成功", f"请求成功，返回信息如下：\n\n{response_data}")
+            ret = True, "大橘签到成功", f"请求成功，返回信息如下：\n\n{response_data}"
         else:
             print("签到失败")
-            send_email("大橘签到失败", f"请求失败，返回信息如下：\n\n{response_data}")
-    except requests.exceptions.RequestException as e:
+            ret = False, "大橘签到失败", f"请求失败，返回信息如下：\n\n{response_data}"
+    except Exception as e:
         print("请求错误:", str(e))
-        send_email("大橘签到异常", str(e))
+        ret = False, "大橘签到异常", str(e)
+    end_time = time.time()  # End time
+    print(f"签到用时: {end_time - start_time:.4f} 秒")
+    return ret
 
 
 if __name__ == "__main__":
-    if(isChecked()):
+    if (isChecked()):
         print("已签到，无需重复签到")
     else:
-        check_in()
+        flag, subject, body = check_in()
+        send_email(subject, body)
