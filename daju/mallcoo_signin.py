@@ -58,8 +58,9 @@ def check_in():
 
 
 if __name__ == "__main__":
-    if (isChecked()):
+    if isChecked():
         print("已签到，无需重复签到")
     else:
         flag, subject, body = check_in()
-        send_email(subject, body)
+        if not flag:
+            send_email(subject, body)

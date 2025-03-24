@@ -46,4 +46,5 @@ if __name__ == "__main__":
         print('今日已签到, 无需再签到')
     else:
         flag, subject, body = check_api()
-        send_email(subject, body)
+        if not flag:
+            send_email(subject, body)

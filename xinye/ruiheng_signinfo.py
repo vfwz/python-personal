@@ -1,12 +1,11 @@
 import json
 import os
-import pytz
 from datetime import datetime
 
+import pytz
 import requests
 
 token = os.getenv("XY_TOKEN")
-
 
 
 def is_today_signed_in():
@@ -33,19 +32,21 @@ def is_today_signed_in():
         if respJson.get("code") != 200:
             return False
 
+        # print(f"HTTP状态码: {response.status_code}, 响应内容: {response.text}")
+
         # Extract today's date in 'YYYY-MM-DD' format
         today_str = datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y-%m-%d")
 
         # Get the list of records
         records = respJson.get("data", {}).get("records", [])
         ret = any(today_str == record.get("signDate") for record in records)
-        print(f"今日[{today_str}]是否已签到: {ret}")
+        signDay = max((record["signDay"] for record in records), default=None)
+        print(f"今日[{today_str}]是否已签到: {ret}, 已连续签到[{signDay}]天")
         # Check if today's date exists in any 'signDate' entry
         return ret
     except Exception as e:
         print(f"签到检查报错: {e}")
         return False  # Return False if any exception occurs
-
 
 
 if __name__ == "__main__":
